@@ -1,0 +1,13 @@
+// TSConfig used by `ts language service` (e.g.: IDEs).
+// Also corresponds to the config for linting and testing
+{
+  "extends": "./tsconfig.base.json",
+  "exclude": [
+    "dist/*",
+  ],
+  "include": [
+    "src/**/*",
+    "test/**/*",
+    ".eslintrc.js"
+  ]
+}

@@ -1,0 +1,7 @@
+{
+  "protocolName": "http-json-meta-protocol",
+  "description": "A protocol for HTTP JSON processing in meta-system",
+  "entrypoint": "./dist/index.js",
+  "version": "1.0.0",
+  "className": "HttpJsonMetaProtocol"
+}
