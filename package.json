@@ -1,6 +1,6 @@
 {
   "name": "http-json-meta-protocol",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "A protocol for HTTP JSON processing in meta-system",
   "main": "./dist/src/index.js",
   "types": "./dist/src/index.d.ts",
@@ -36,6 +36,7 @@
   "homepage": "https://github.com/mapikit/http-json-meta-protocol#readme",
   "devDependencies": {
     "@meta-system/meta-function-helper": "^0.3.3",
+    "@types/cors": "^2.8.12",
     "@types/express": "^4.17.9",
     "@types/jsonwebtoken": "^8.3.9",
     "@types/node": "^12.12.35",

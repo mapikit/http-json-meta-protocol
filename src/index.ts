@@ -5,7 +5,7 @@ import { HTTPJsonBodyRoute } from "./http-jsonbody-route";
 import { Server } from "http";
 import { MetaProtocol } from "@meta-system/meta-protocol-helper";
 import { FunctionManager } from "@meta-system/meta-function-helper";
-import { cors } from "cors";
+import cors from "cors";
 
 export class HttpJsonMetaProtocol extends MetaProtocol<HTTP_JSONBODY_CONFIGURATION> {
   public getProtocolPublicMethods () : Record<string, Function> {
