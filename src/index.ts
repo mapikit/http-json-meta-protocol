@@ -1,10 +1,11 @@
 import express = require("express");
 import { json } from "body-parser";
 import { HTTP_JSONBODY_CONFIGURATION } from "./configuration";
-import { ishttpJsonBodyConfiguration } from "./http-jsonbody-configuration-validation";
 import { HTTPJsonBodyRoute } from "./http-jsonbody-route";
-import { FunctionManager, MetaProtocol } from "meta-protocol-helper/dist/src/meta-protocol";
 import { Server } from "http";
+import { MetaProtocol } from "@meta-system/meta-protocol-helper";
+import { FunctionManager } from "@meta-system/meta-function-helper";
+import { cors } from "cors";
 
 export class HttpJsonMetaProtocol extends MetaProtocol<HTTP_JSONBODY_CONFIGURATION> {
   public getProtocolPublicMethods () : Record<string, Function> {
@@ -19,14 +20,16 @@ export class HttpJsonMetaProtocol extends MetaProtocol<HTTP_JSONBODY_CONFIGURATI
     super(protocolConfiguration, functionManager);
   }
 
-  public validateConfiguration () : void {
-    ishttpJsonBodyConfiguration(this.protocolConfiguration);
-  }
-
   // eslint-disable-next-line max-lines-per-function
   public async start () : Promise<void> {
     const httpApp = express();
     httpApp.use(json());
+
+    if (this.protocolConfiguration.enableCors) {
+      const corsArgs = this.protocolConfiguration.corsConfig ?? undefined;
+      httpApp.use(cors(corsArgs));
+    }
+
 
     const routes = this.protocolConfiguration.routes.map((routeConfig) => {
       console.log(`[HTTP_JSONBODY_PROTOCOL] Mapping route "${routeConfig.route}" at port ${

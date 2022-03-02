@@ -1,5 +1,10 @@
 export type HTTP_JSONBODY_CONFIGURATION = {
   port : number;
+  enableCors : boolean;
+  corsConfig : {
+    origin : string;
+    optionsSuccessStatus : number
+  };
   routes : HTTPRouteConfiguration[];
 };
 

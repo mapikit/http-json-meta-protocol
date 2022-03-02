@@ -1,5 +1,5 @@
+import { FunctionManager } from "@meta-system/meta-function-helper";
 import { Request, Response, Router } from "express";
-import { FunctionManager } from "meta-protocol-helper/dist/src/meta-protocol";
 import { HTTPRouteConfiguration } from "./configuration";
 import { HTTPJsonBodyInputMap } from "./input-map";
 import { HTTPJsonBodyOutputMap } from "./output-map";
