@@ -20,7 +20,7 @@
         "originPath": { "type": "string", "required": true },
         "targetPath": { "type": "string", "required": true }
       }},
-      "resultMap": { "type": "object", "required": true, "subtype": {
+      "resultMapConfiguration": { "type": "object", "required": true, "subtype": {
         "statusCode": { "type": "string", "required": true },
         "headers": { "type": "array", "required": true, "subtype": "cloudedObject" },
         "body": { "type": "cloudedObject", "required": true }
