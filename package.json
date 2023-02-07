@@ -1,6 +1,6 @@
 {
   "name": "http-json-meta-protocol",
-  "version": "2.0.3",
+  "version": "2.0.4",
   "description": "A protocol for HTTP JSON processing in meta-system",
   "main": "./dist/src/index.js",
   "types": "./dist/src/index.d.ts",
