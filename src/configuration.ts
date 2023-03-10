@@ -1,19 +1,29 @@
-export type HTTP_JSONBODY_CONFIGURATION = {
+export type HTTP_CONFIGURATION = {
   port : number;
+  host : string;
+  routePrefix ?: string;
   enableCors : boolean;
   corsConfig : {
     origin : string;
-    optionsSuccessStatus : number
+    optionsSuccessStatus : number;
+    allowedHeaders : string;
   };
+  cookieSecret ?: string;
   routes : HTTPRouteConfiguration[];
 };
 
 export type HTTPRouteConfiguration = {
   route : string;
+  middlewares ?: Middleware[];
   businessOperation : string;
   method : "GET" | "PUT" | "POST" | "PATCH" | "DELETE";
   inputMapConfiguration : InputMap[];
   resultMapConfiguration : ResultMap;
+}
+
+export type Middleware = {
+  businessOperation : string;
+
 }
 
 export type InputMap = {

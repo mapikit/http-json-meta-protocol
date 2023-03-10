@@ -1,6 +1,7 @@
+import fastifyMiddie from "@fastify/middie";
 import { FunctionManager } from "@meta-system/meta-function-helper";
-import { Request, Response, Router } from "express";
-import { HTTPRouteConfiguration } from "./configuration";
+import { FastifyInstance, FastifyPluginAsync, FastifyReply, FastifyRequest, HookHandlerDoneFunction } from "fastify";
+import { HTTPRouteConfiguration, Middleware } from "./configuration";
 import { HTTPJsonBodyInputMap } from "./input-map";
 import { HTTPJsonBodyOutputMap } from "./output-map";
 
@@ -10,23 +11,49 @@ export class HTTPJsonBodyRoute {
     private functionManager : FunctionManager,
   ) { }
 
-  public setupRouter () : Router {
-    const router = Router();
-    const method = this.routeConfigurations.method
-      .toLocaleLowerCase() as HTTPRouteConfiguration["method"];
+  // eslint-disable-next-line max-lines-per-function
+  public getPlugin () : FastifyPluginAsync {
+    const result = async (server : FastifyInstance) : Promise<void> => {
+      if (this.routeConfigurations.middlewares) {
+        await server.register(fastifyMiddie, { hook: "onRequest" });
+        this.routeConfigurations.middlewares.forEach((middleware) => {
+          server.register(this.getMiddleware(middleware))
+            // eslint-disable-next-line @typescript-eslint/no-empty-function
+            .then(() => {}, (err) => { throw err; });
+        });
+      }
+      server.route({
+        method: this.routeConfigurations.method,
+        url: this.routeConfigurations.route,
+        handler: this.wrapFunctionInProtocol(),
+      });
+    };
 
-    router[method](
-      this.routeConfigurations.route,
-      this.wrapFunctionInProtocol(),
-    );
-
-    return router;
+    return result;
   }
 
-  private wrapFunctionInProtocol () : (req : Request, res : Response) => Promise<void> {
+  private getMiddleware (middleware : Middleware) : FastifyPluginAsync {
+    const bop = this.functionManager.get(middleware.businessOperation);
+
+    const result = async (server : FastifyInstance) : Promise<void> => {
+      const wrapped = (async (req : FastifyRequest, res : FastifyReply, done : HookHandlerDoneFunction)
+      : Promise<void> => {
+        // TODO pass the response here somehow
+        const functionInputs = HTTPJsonBodyInputMap.mapInputs(req, this.routeConfigurations);
+        await bop(functionInputs);
+        done();
+      });
+
+      server.addHook("onRequest", wrapped);
+    };
+
+    return result;
+  }
+
+  private wrapFunctionInProtocol () : (req : FastifyRequest, res : FastifyReply) => Promise<void> {
     const bop = this.functionManager.get(this.routeConfigurations.businessOperation);
 
-    return (async (req : Request, res : Response) : Promise<void> => {
+    return (async (req : FastifyRequest, res : FastifyReply) : Promise<void> => {
       const functionInputs = HTTPJsonBodyInputMap.mapInputs(req, this.routeConfigurations);
 
       const result = await bop(functionInputs);

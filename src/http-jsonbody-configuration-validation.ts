@@ -1,7 +1,7 @@
-import { HTTP_JSONBODY_CONFIGURATION, HTTPRouteConfiguration } from "./configuration";
+import { HTTP_CONFIGURATION, HTTPRouteConfiguration } from "./configuration";
 
-export function ishttpJsonBodyConfiguration (object : unknown) : asserts object is HTTP_JSONBODY_CONFIGURATION {
-  const configurationLikeObject = object as HTTP_JSONBODY_CONFIGURATION;
+export function ishttpJsonBodyConfiguration (object : unknown) : asserts object is HTTP_CONFIGURATION {
+  const configurationLikeObject = object as HTTP_CONFIGURATION;
 
   if (typeof configurationLikeObject.port !== "number") {
     throw Error("No port was specified for the configuration of HTTP_JSONBODY protocol");
