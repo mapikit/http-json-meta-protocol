@@ -2,8 +2,8 @@ import fastifyMiddie from "@fastify/middie";
 import { FunctionManager } from "@meta-system/meta-function-helper";
 import { FastifyInstance, FastifyPluginAsync, FastifyReply, FastifyRequest, HookHandlerDoneFunction } from "fastify";
 import { HTTPRouteConfiguration, Middleware } from "./configuration";
-import { HTTPJsonBodyInputMap } from "./input-map";
-import { HTTPJsonBodyOutputMap } from "./output-map";
+import { HTTPInputMap } from "./input-map";
+import { HTTPOutputMap } from "./output-map";
 
 export class HTTPJsonBodyRoute {
   public constructor (
@@ -14,14 +14,14 @@ export class HTTPJsonBodyRoute {
   // eslint-disable-next-line max-lines-per-function
   public getPlugin () : FastifyPluginAsync {
     const result = async (server : FastifyInstance) : Promise<void> => {
-      if (this.routeConfigurations.middlewares) {
-        await server.register(fastifyMiddie, { hook: "onRequest" });
-        this.routeConfigurations.middlewares.forEach((middleware) => {
-          server.register(this.getMiddleware(middleware))
-            // eslint-disable-next-line @typescript-eslint/no-empty-function
-            .then(() => {}, (err) => { throw err; });
-        });
-      }
+      // if (this.routeConfigurations.middlewares) {
+      //   await server.register(fastifyMiddie, { hook: "onRequest" });
+      //   this.routeConfigurations.middlewares.forEach((middleware) => {
+      //     server.register(this.getMiddleware(middleware))
+      //       // eslint-disable-next-line @typescript-eslint/no-empty-function
+      //       .then(() => {}, (err) => { throw err; });
+      //   });
+      // }
       server.route({
         method: this.routeConfigurations.method,
         url: this.routeConfigurations.route,
@@ -39,7 +39,7 @@ export class HTTPJsonBodyRoute {
       const wrapped = (async (req : FastifyRequest, res : FastifyReply, done : HookHandlerDoneFunction)
       : Promise<void> => {
         // TODO pass the response here somehow
-        const functionInputs = HTTPJsonBodyInputMap.mapInputs(req, this.routeConfigurations);
+        const functionInputs = HTTPInputMap.mapInputs(req, this.routeConfigurations);
         await bop(functionInputs);
         done();
       });
@@ -54,11 +54,11 @@ export class HTTPJsonBodyRoute {
     const bop = this.functionManager.get(this.routeConfigurations.businessOperation);
 
     return (async (req : FastifyRequest, res : FastifyReply) : Promise<void> => {
-      const functionInputs = HTTPJsonBodyInputMap.mapInputs(req, this.routeConfigurations);
+      const functionInputs = HTTPInputMap.mapInputs(req, this.routeConfigurations);
 
       const result = await bop(functionInputs);
 
-      HTTPJsonBodyOutputMap.resolveOutput(result, res, this.routeConfigurations);
+      HTTPOutputMap.resolveOutput(result, res, this.routeConfigurations);
     });
   }
 }

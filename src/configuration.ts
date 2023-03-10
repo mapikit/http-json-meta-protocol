@@ -27,7 +27,7 @@ export type Middleware = {
 }
 
 export type InputMap = {
-  origin : "route" | "queryParams" | "headers" | "body";
+  origin : "route" | "queryParams" | "headers" | "body" | "cookie" | "other";
   originPath : string;
   targetPath : string;
 }
@@ -36,4 +36,13 @@ export type ResultMap = {
   statusCode : string | number;
   headers : Array<Record<string, unknown>>;
   body : Record<string, unknown>;
+  cookies ?: CookieData[];
 }
+
+export type CookieData = {
+  name : string;
+  data : string;
+  signed ?: boolean;
+  path ?: string;
+};
+

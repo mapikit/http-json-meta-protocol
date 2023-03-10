@@ -3,7 +3,7 @@ import { HTTPRouteConfiguration, InputMap } from "./configuration";
 import { setValueAtObjectPath } from "./utils/set-value-at-object-path";
 import { FastifyRequest } from "fastify";
 
-export class HTTPJsonBodyInputMap {
+export class HTTPInputMap {
   /**
    * Recieves an HTTP request and returns an object compatible with the activationFunction params
    */
@@ -18,7 +18,7 @@ export class HTTPJsonBodyInputMap {
     return inputObject;
   }
 
-  // TODO: add cookie here
+  // eslint-disable-next-line max-lines-per-function
   private static getValueFromRequest (request : FastifyRequest, inputMap : InputMap) : unknown {
     if (inputMap.origin === "body") {
       return getObjectProperty(request.body as object, inputMap.originPath);
@@ -32,6 +32,14 @@ export class HTTPJsonBodyInputMap {
       return request.headers[inputMap.originPath];
     }
 
-    return request.params[inputMap.originPath];
+    if (inputMap.origin === "cookie") {
+      return request.cookies[inputMap.originPath];
+    }
+
+    if (inputMap.origin === "route") {
+      return request.params[inputMap.originPath];
+    }
+
+    return request[inputMap.originPath];
   }
 }
