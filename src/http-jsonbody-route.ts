@@ -58,7 +58,7 @@ export class HTTPJsonBodyRoute {
 
       const result = await bop(functionInputs);
 
-      HTTPOutputMap.resolveOutput(result, res, this.routeConfigurations);
+      await HTTPOutputMap.resolveOutput(result, res, this.routeConfigurations);
     });
   }
 }

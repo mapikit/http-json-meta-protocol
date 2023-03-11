@@ -1,5 +1,5 @@
 import { FastifyReply } from "fastify";
-import clone from "just-clone";
+import clone from "../node_modules/just-clone/index.mjs";
 import { HTTPRouteConfiguration } from "./configuration";
 import { getObjectProperty } from "./utils/get-object-property";
 
@@ -14,15 +14,26 @@ export class HTTPOutputMap {
 
     this.setObjectResponse(outputBody, outputData);
 
-    await this.setHeaders(outputData, routeConfiguration, response);
-    await response.setCookie()
-    await response.headers()
-    await response.status(statusCode);
+    this.setHeaders(outputData, routeConfiguration, response);
+    this.setCookies(outputData, routeConfiguration, response);
+    void response.status(statusCode);
     await response.send(outputBody);
   }
 
-  private static async setCookies () : Promise<void> {
-    
+  private static setCookies (
+    outputData : object, routeConfiguration : HTTPRouteConfiguration, response : FastifyReply,
+  ) : void {
+    if (!routeConfiguration.resultMapConfiguration.cookies) {
+      return;
+    }
+
+    routeConfiguration.resultMapConfiguration.cookies.forEach((cookie) => {
+      void response.setCookie(
+        getObjectProperty(outputData, cookie.namePath),
+        getObjectProperty(outputData, cookie.dataPath),
+        { path: cookie.path, signed: cookie.signed, httpOnly: cookie.httpOnly },
+      );
+    });
   }
 
   private static setObjectResponse (outputBody : object, data : object) : void {
@@ -52,18 +63,17 @@ export class HTTPOutputMap {
     return statusCode;
   }
 
-  private static async setHeaders (
-    outputData : object, routeConfiguration : HTTPRouteConfiguration, response : FastifyReply) : Promise<void> {
-    const result = [];
+  private static setHeaders (
+    outputData : object, routeConfiguration : HTTPRouteConfiguration, response : FastifyReply) : void {
+
     routeConfiguration.resultMapConfiguration.headers.forEach((headerInfo) => {
       const headerName = Object.keys(headerInfo)[0];
       const headerValue = headerInfo[headerName];
       const getValue = typeof headerValue === "string"
         ? getObjectProperty(outputData, headerValue) ?? headerValue
         : headerValue;
-      result.push(response.header(headerName, getValue as string));
-    });
 
-    return Promise.all(result).then(() => {});
+      void response.header(headerName, getValue as string);
+    });
   }
 }

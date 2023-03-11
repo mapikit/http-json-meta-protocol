@@ -40,9 +40,10 @@ export type ResultMap = {
 }
 
 export type CookieData = {
-  name : string;
-  data : string;
+  namePath : string;
+  dataPath : string;
   signed ?: boolean;
   path ?: string;
+  httpOnly ?: boolean;
 };
 
