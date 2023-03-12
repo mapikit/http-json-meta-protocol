@@ -23,13 +23,28 @@ export type HTTPRouteConfiguration = {
 
 export type Middleware = {
   businessOperation : string;
-
+  inputMapConfiguration : InputMap[];
+  injectMapConfiguration ?: InjectMap[];
+  interceptMapConfiguration ?: InterceptMap;
 }
 
 export type InputMap = {
   origin : "route" | "queryParams" | "headers" | "body" | "cookie" | "other";
   originPath : string;
   targetPath : string;
+}
+
+export type InjectMap = {
+  originPath : string;
+  targetPath : string;
+}
+
+export type InterceptMap = {
+  shouldInterceptPath : string; // A string specifying where to get the value if should intercept
+  statusCode : string | number;
+  headers : Array<Record<string, unknown>>;
+  body : Record<string, unknown>;
+  cookies ?: CookieData[];
 }
 
 export type ResultMap = {

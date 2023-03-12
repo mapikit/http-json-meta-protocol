@@ -42,23 +42,27 @@ export class HttpMetaProtocol extends MetaProtocol<HTTP_CONFIGURATION> {
       await this.server.register(fastifyCookie, { secret: this.protocolConfiguration.cookieSecret });
     }
 
+    const routesSequences = [];
     this.protocolConfiguration.routes.forEach((routeConfig) => {
       console.log(`[HTTP_JSONBODY_PROTOCOL] Mapping route "${routeConfig.route}" at port ${
         this.protocolConfiguration.port
       }`);
 
 
-      this.server.register(new HTTPJsonBodyRoute(routeConfig, this.bopsManager).getPlugin())
+      routesSequences.push(this.server.register(new HTTPJsonBodyRoute(routeConfig, this.bopsManager).getPlugin())
         .then(() => {
           console.log(`[HTTP_JSONBODY_PROTOCOL] DONE Mapping route "${routeConfig.route}"`);
         }, (err) => {
           console.log(`[HTTP_JSONBODY_PROTOCOL] !! FAILED Mapping route "${routeConfig.route}" :: ${err}`);
-        });
+        }));
     });
+
+    await Promise.all(routesSequences);
 
     // eslint-disable-next-line max-lines-per-function
     return new Promise((resolve, reject) => {
       this.server.listen({ port: this.protocolConfiguration.port, host: this.protocolConfiguration.host })
+        .then((a) => { console.log(a); })
         .catch((err) => {
           reject(`[HTTP_JSONBODY_PROTOCOL] Error while setting up port ${this.protocolConfiguration.port} :: ${err}`);
           console.log(

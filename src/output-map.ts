@@ -1,6 +1,6 @@
 import { FastifyReply } from "fastify";
 import clone from "../node_modules/just-clone/index.mjs";
-import { HTTPRouteConfiguration } from "./configuration";
+import { ResultMap } from "./configuration";
 import { getObjectProperty } from "./utils/get-object-property";
 
 export class HTTPOutputMap {
@@ -8,29 +8,29 @@ export class HTTPOutputMap {
    * Gets the BOps output, maps it to a valid HTTP response and resolves the request
    */
   public static async resolveOutput (
-    outputData : object, response : FastifyReply, routeConfiguration : HTTPRouteConfiguration) : Promise<void> {
-    const outputBody = clone(routeConfiguration.resultMapConfiguration.body);
-    const statusCode = this.getStatusCode(outputData, routeConfiguration);
+    outputData : object, response : FastifyReply, resultMap : ResultMap) : Promise<void> {
+    const outputBody = clone(resultMap.body);
+    const statusCode = this.getStatusCode(outputData, resultMap);
 
     this.setObjectResponse(outputBody, outputData);
 
-    this.setHeaders(outputData, routeConfiguration, response);
-    this.setCookies(outputData, routeConfiguration, response);
+    this.setHeaders(outputData, resultMap, response);
+    this.setCookies(outputData, resultMap, response);
     void response.status(statusCode);
     await response.send(outputBody);
   }
 
   private static setCookies (
-    outputData : object, routeConfiguration : HTTPRouteConfiguration, response : FastifyReply,
+    outputData : object, routeConfiguration : ResultMap, response : FastifyReply,
   ) : void {
-    if (!routeConfiguration.resultMapConfiguration.cookies) {
+    if (!routeConfiguration.cookies) {
       return;
     }
 
-    routeConfiguration.resultMapConfiguration.cookies.forEach((cookie) => {
+    routeConfiguration.cookies.forEach((cookie) => {
       void response.setCookie(
-        getObjectProperty(outputData, cookie.namePath),
-        getObjectProperty(outputData, cookie.dataPath),
+        getObjectProperty(outputData, cookie.namePath) ?? cookie.namePath,
+        getObjectProperty(outputData, cookie.dataPath) ?? cookie.dataPath,
         { path: cookie.path, signed: cookie.signed, httpOnly: cookie.httpOnly },
       );
     });
@@ -39,7 +39,7 @@ export class HTTPOutputMap {
   private static setObjectResponse (outputBody : object, data : object) : void {
     Object.keys(outputBody).forEach((outputKey) => {
       if (typeof outputBody[outputKey] === "string") {
-        outputBody[outputKey] = getObjectProperty(data, outputBody[outputKey]);
+        outputBody[outputKey] = getObjectProperty(data, outputBody[outputKey]) ?? outputBody[outputKey];
         return;
       }
 
@@ -47,14 +47,14 @@ export class HTTPOutputMap {
     });
   }
 
-  private static getStatusCode (outputData : object, routeConfiguration : HTTPRouteConfiguration) : number {
+  private static getStatusCode (outputData : object, routeConfiguration : ResultMap) : number {
     let statusCode;
 
     try {
-      if (typeof routeConfiguration.resultMapConfiguration.statusCode === "number") {
-        statusCode = routeConfiguration.resultMapConfiguration.statusCode;
+      if (typeof routeConfiguration.statusCode === "number") {
+        statusCode = routeConfiguration.statusCode;
       } else {
-        statusCode = getObjectProperty(outputData, routeConfiguration.resultMapConfiguration.statusCode);
+        statusCode = getObjectProperty(outputData, routeConfiguration.statusCode);
       }
     } catch {
       statusCode = 500;
@@ -64,9 +64,9 @@ export class HTTPOutputMap {
   }
 
   private static setHeaders (
-    outputData : object, routeConfiguration : HTTPRouteConfiguration, response : FastifyReply) : void {
+    outputData : object, routeConfiguration : ResultMap, response : FastifyReply) : void {
 
-    routeConfiguration.resultMapConfiguration.headers.forEach((headerInfo) => {
+    routeConfiguration.headers.forEach((headerInfo) => {
       const headerName = Object.keys(headerInfo)[0];
       const headerValue = headerInfo[headerName];
       const getValue = typeof headerValue === "string"

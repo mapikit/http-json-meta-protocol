@@ -1,6 +1,15 @@
 import fastifyMiddie from "@fastify/middie";
 import { FunctionManager } from "@meta-system/meta-function-helper";
-import { FastifyInstance, FastifyPluginAsync, FastifyReply, FastifyRequest, HookHandlerDoneFunction } from "fastify";
+import {
+  FastifyInstance,
+  FastifyPluginAsync,
+  FastifyReply,
+  FastifyRequest,
+  HookHandlerDoneFunction,
+  onRequestHookHandler,
+} from "fastify";
+import { getObjectProperty } from "./utils/get-object-property";
+import { setValueAtObjectPath } from "./utils/set-value-at-object-path";
 import { HTTPRouteConfiguration, Middleware } from "./configuration";
 import { HTTPInputMap } from "./input-map";
 import { HTTPOutputMap } from "./output-map";
@@ -14,14 +23,12 @@ export class HTTPJsonBodyRoute {
   // eslint-disable-next-line max-lines-per-function
   public getPlugin () : FastifyPluginAsync {
     const result = async (server : FastifyInstance) : Promise<void> => {
-      // if (this.routeConfigurations.middlewares) {
-      //   await server.register(fastifyMiddie, { hook: "onRequest" });
-      //   this.routeConfigurations.middlewares.forEach((middleware) => {
-      //     server.register(this.getMiddleware(middleware))
-      //       // eslint-disable-next-line @typescript-eslint/no-empty-function
-      //       .then(() => {}, (err) => { throw err; });
-      //   });
-      // }
+      if (this.routeConfigurations.middlewares) {
+        await server.register(fastifyMiddie, { hook: "preHandler" });
+        this.routeConfigurations.middlewares.forEach((middleware) => {
+          server.addHook("preHandler", this.getMiddleware(middleware));
+        });
+      }
       server.route({
         method: this.routeConfigurations.method,
         url: this.routeConfigurations.route,
@@ -32,33 +39,46 @@ export class HTTPJsonBodyRoute {
     return result;
   }
 
-  private getMiddleware (middleware : Middleware) : FastifyPluginAsync {
+  // eslint-disable-next-line max-lines-per-function
+  private getMiddleware (middleware : Middleware)
+    : onRequestHookHandler {
     const bop = this.functionManager.get(middleware.businessOperation);
+    // eslint-disable-next-line max-lines-per-function
+    const wrapped = (async (req : FastifyRequest, res : FastifyReply, done : HookHandlerDoneFunction)
+    : Promise<void> => {
+      const functionInputs = HTTPInputMap.mapInputs(req, middleware.inputMapConfiguration);
+      console.log(functionInputs);
+      const results = await bop(functionInputs);
 
-    const result = async (server : FastifyInstance) : Promise<void> => {
-      const wrapped = (async (req : FastifyRequest, res : FastifyReply, done : HookHandlerDoneFunction)
-      : Promise<void> => {
-        // TODO pass the response here somehow
-        const functionInputs = HTTPInputMap.mapInputs(req, this.routeConfigurations);
-        await bop(functionInputs);
-        done();
-      });
+      if (
+        middleware?.interceptMapConfiguration?.shouldInterceptPath) {
+        const shouldIntercept = getObjectProperty(results, middleware.interceptMapConfiguration.shouldInterceptPath);
 
-      server.addHook("onRequest", wrapped);
-    };
+        if (shouldIntercept) {
+          await HTTPOutputMap.resolveOutput(results, res, middleware.interceptMapConfiguration);
+          return;
+        }
+      }
 
-    return result;
+      if (middleware?.injectMapConfiguration) {
+        middleware.injectMapConfiguration.forEach((injection) => {
+          setValueAtObjectPath(req, injection.targetPath, getObjectProperty(results, injection.originPath));
+        });
+      }
+      done();
+    });
+
+    return wrapped;
   }
 
   private wrapFunctionInProtocol () : (req : FastifyRequest, res : FastifyReply) => Promise<void> {
     const bop = this.functionManager.get(this.routeConfigurations.businessOperation);
 
     return (async (req : FastifyRequest, res : FastifyReply) : Promise<void> => {
-      const functionInputs = HTTPInputMap.mapInputs(req, this.routeConfigurations);
-
+      const functionInputs = HTTPInputMap.mapInputs(req, this.routeConfigurations.inputMapConfiguration);
       const result = await bop(functionInputs);
 
-      await HTTPOutputMap.resolveOutput(result, res, this.routeConfigurations);
+      await HTTPOutputMap.resolveOutput(result, res, this.routeConfigurations.resultMapConfiguration);
     });
   }
 }

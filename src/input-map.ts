@@ -1,5 +1,5 @@
 import { getObjectProperty } from "./utils/get-object-property";
-import { HTTPRouteConfiguration, InputMap } from "./configuration";
+import { InputMap } from "./configuration";
 import { setValueAtObjectPath } from "./utils/set-value-at-object-path";
 import { FastifyRequest } from "fastify";
 
@@ -7,10 +7,10 @@ export class HTTPInputMap {
   /**
    * Recieves an HTTP request and returns an object compatible with the activationFunction params
    */
-  public static mapInputs (request : FastifyRequest, routeConfig : HTTPRouteConfiguration) : unknown {
+  public static mapInputs (request : FastifyRequest, routeConfig : InputMap[]) : unknown {
     const inputObject = {};
 
-    routeConfig.inputMapConfiguration.forEach((inputMapper) => {
+    routeConfig.forEach((inputMapper) => {
       const propertyValue = this.getValueFromRequest(request, inputMapper);
       setValueAtObjectPath(inputObject, inputMapper.targetPath, propertyValue);
     });
