@@ -9,5 +9,14 @@
     "src/**/*",
     "test/**/*",
     ".eslintrc.js"
-  ]
+  ],
+  "compilerOptions": {
+    "types": ["node"],
+    "module": "ESNext",
+    "esModuleInterop": true
+  },
+  "ts-node": {
+    "esm": true,
+    "experimentalSpecifierResolution": "node",
+  }
 }

@@ -2,7 +2,7 @@
 // Other configurations may extend this file with the "extends" parameter. 
 {
   "compilerOptions": {
-    "module": "commonjs",
+    "module": "ES2015",
     "resolveJsonModule": true,
     "esModuleInterop": true,
     "declaration": true,

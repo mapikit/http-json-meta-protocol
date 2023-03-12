@@ -1,28 +1,45 @@
-import clone from "just-clone";
-import { Response } from "express";
-import { HTTPRouteConfiguration } from "./configuration";
+import { FastifyReply } from "fastify";
+import clone from "../node_modules/just-clone/index.mjs";
+import { ResultMap } from "./configuration";
 import { getObjectProperty } from "./utils/get-object-property";
 
-export class HTTPJsonBodyOutputMap {
+export class HTTPOutputMap {
   /**
    * Gets the BOps output, maps it to a valid HTTP response and resolves the request
    */
-  public static resolveOutput (
-    outputData : object, response : Response, routeConfiguration : HTTPRouteConfiguration) : void {
-    const outputBody = clone(routeConfiguration.resultMapConfiguration.body);
-    const statusCode = this.getStatusCode(outputData, routeConfiguration);
+  public static async resolveOutput (
+    outputData : object, response : FastifyReply, resultMap : ResultMap) : Promise<void> {
+    const outputBody = clone(resultMap.body);
+    const statusCode = this.getStatusCode(outputData, resultMap);
 
     this.setObjectResponse(outputBody, outputData);
-    this.setHeaders(outputData, routeConfiguration, response);
 
-    response.status(statusCode);
-    response.send(outputBody);
+    this.setHeaders(outputData, resultMap, response);
+    this.setCookies(outputData, resultMap, response);
+    void response.status(statusCode);
+    await response.send(outputBody);
+  }
+
+  private static setCookies (
+    outputData : object, routeConfiguration : ResultMap, response : FastifyReply,
+  ) : void {
+    if (!routeConfiguration.cookies) {
+      return;
+    }
+
+    routeConfiguration.cookies.forEach((cookie) => {
+      void response.setCookie(
+        getObjectProperty(outputData, cookie.namePath) ?? cookie.namePath,
+        getObjectProperty(outputData, cookie.dataPath) ?? cookie.dataPath,
+        { path: cookie.path, signed: cookie.signed, httpOnly: cookie.httpOnly },
+      );
+    });
   }
 
   private static setObjectResponse (outputBody : object, data : object) : void {
     Object.keys(outputBody).forEach((outputKey) => {
       if (typeof outputBody[outputKey] === "string") {
-        outputBody[outputKey] = getObjectProperty(data, outputBody[outputKey]);
+        outputBody[outputKey] = getObjectProperty(data, outputBody[outputKey]) ?? outputBody[outputKey];
         return;
       }
 
@@ -30,14 +47,14 @@ export class HTTPJsonBodyOutputMap {
     });
   }
 
-  private static getStatusCode (outputData : object, routeConfiguration : HTTPRouteConfiguration) : number {
+  private static getStatusCode (outputData : object, routeConfiguration : ResultMap) : number {
     let statusCode;
 
     try {
-      if (typeof routeConfiguration.resultMapConfiguration.statusCode === "number") {
-        statusCode = routeConfiguration.resultMapConfiguration.statusCode;
+      if (typeof routeConfiguration.statusCode === "number") {
+        statusCode = routeConfiguration.statusCode;
       } else {
-        statusCode = getObjectProperty(outputData, routeConfiguration.resultMapConfiguration.statusCode);
+        statusCode = getObjectProperty(outputData, routeConfiguration.statusCode);
       }
     } catch {
       statusCode = 500;
@@ -47,14 +64,16 @@ export class HTTPJsonBodyOutputMap {
   }
 
   private static setHeaders (
-    outputData : object, routeConfiguration : HTTPRouteConfiguration, response : Response) : void {
-    routeConfiguration.resultMapConfiguration.headers.forEach((headerInfo) => {
+    outputData : object, routeConfiguration : ResultMap, response : FastifyReply) : void {
+
+    routeConfiguration.headers.forEach((headerInfo) => {
       const headerName = Object.keys(headerInfo)[0];
       const headerValue = headerInfo[headerName];
       const getValue = typeof headerValue === "string"
         ? getObjectProperty(outputData, headerValue) ?? headerValue
         : headerValue;
-      response.set(headerName, getValue as string);
+
+      void response.header(headerName, getValue as string);
     });
   }
 }
