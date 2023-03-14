@@ -4,7 +4,6 @@
   "description": "A protocol for HTTP Servers in meta-system",
   "main": "./dist/src/index.js",
   "types": "./dist/src/index.d.ts",
-  "type": "module",
   "scripts": {
     "build": "npm ci && npx tsc -p tsconfig.build.json"
   },
