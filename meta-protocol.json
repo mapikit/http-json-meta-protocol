@@ -5,6 +5,7 @@
   "className": "HttpMetaProtocol",
   "configurationFormat": {
     "port": { "type": "number", "required": true },
+    "host": { "type": "string", "required": true },
     "enableCors": { "type": "boolean" },
     "corsConfig": { "type": "object", "subtype": {
       "origin": { "type": "string", "required": true },
