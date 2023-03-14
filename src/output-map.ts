@@ -1,5 +1,5 @@
 import { FastifyReply } from "fastify";
-import clone from "../node_modules/just-clone/index.cjs";
+import clone from "just-clone/index.cjs";
 import { ResultMap } from "./configuration";
 import { getObjectProperty } from "./utils/get-object-property";
 
