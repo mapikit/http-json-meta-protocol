@@ -1,18 +1,11 @@
 import fastifyMiddie from "@fastify/middie";
 import { FunctionManager } from "@meta-system/meta-function-helper";
-import {
-  FastifyInstance,
-  FastifyPluginAsync,
-  FastifyReply,
-  FastifyRequest,
-  HookHandlerDoneFunction,
-  onRequestHookHandler,
-} from "fastify";
-import { getObjectProperty } from "./utils/get-object-property";
-import { setValueAtObjectPath } from "./utils/set-value-at-object-path";
-import { HTTPRouteConfiguration, Middleware } from "./configuration";
-import { HTTPInputMap } from "./input-map";
-import { HTTPOutputMap } from "./output-map";
+import Fastify from "fastify";
+import { getObjectProperty } from "./utils/get-object-property.js";
+import { setValueAtObjectPath } from "./utils/set-value-at-object-path.js";
+import { HTTPRouteConfiguration, Middleware } from "./configuration.js";
+import { HTTPInputMap } from "./input-map.js";
+import { HTTPOutputMap } from "./output-map.js";
 
 export class HTTPJsonBodyRoute {
   public constructor (
@@ -21,8 +14,8 @@ export class HTTPJsonBodyRoute {
   ) { }
 
   // eslint-disable-next-line max-lines-per-function
-  public getPlugin () : FastifyPluginAsync {
-    const result = async (server : FastifyInstance) : Promise<void> => {
+  public getPlugin () : Fastify.FastifyPluginAsync {
+    const result = async (server : Fastify.FastifyInstance) : Promise<void> => {
       if (this.routeConfigurations.middlewares) {
         await server.register(fastifyMiddie, { hook: "preHandler" });
         this.routeConfigurations.middlewares.forEach((middleware) => {
@@ -41,10 +34,11 @@ export class HTTPJsonBodyRoute {
 
   // eslint-disable-next-line max-lines-per-function
   private getMiddleware (middleware : Middleware)
-    : onRequestHookHandler {
+    : Fastify.onRequestHookHandler {
     const bop = this.functionManager.get(middleware.businessOperation);
     // eslint-disable-next-line max-lines-per-function
-    const wrapped = (async (req : FastifyRequest, res : FastifyReply, done : HookHandlerDoneFunction)
+    const wrapped = (async (
+      req : Fastify.FastifyRequest, res : Fastify.FastifyReply, done : Fastify.HookHandlerDoneFunction)
     : Promise<void> => {
       const functionInputs = HTTPInputMap.mapInputs(req, middleware.inputMapConfiguration);
       console.log(functionInputs);
@@ -71,10 +65,10 @@ export class HTTPJsonBodyRoute {
     return wrapped;
   }
 
-  private wrapFunctionInProtocol () : (req : FastifyRequest, res : FastifyReply) => Promise<void> {
+  private wrapFunctionInProtocol () : (req : Fastify.FastifyRequest, res : Fastify.FastifyReply) => Promise<void> {
     const bop = this.functionManager.get(this.routeConfigurations.businessOperation);
 
-    return (async (req : FastifyRequest, res : FastifyReply) : Promise<void> => {
+    return (async (req : Fastify.FastifyRequest, res : Fastify.FastifyReply) : Promise<void> => {
       const functionInputs = HTTPInputMap.mapInputs(req, this.routeConfigurations.inputMapConfiguration);
       const result = await bop(functionInputs);
 

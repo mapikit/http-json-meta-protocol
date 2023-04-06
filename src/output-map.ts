@@ -1,8 +1,7 @@
 import { FastifyReply } from "fastify";
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const clone = require("just-clone");
-import { ResultMap } from "./configuration";
-import { getObjectProperty } from "./utils/get-object-property";
+import clone from "just-clone";
+import { ResultMap } from "./configuration.js";
+import { getObjectProperty } from "./utils/get-object-property.js";
 
 export class HTTPOutputMap {
   /**

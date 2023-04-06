@@ -1,8 +1,8 @@
-import { HTTP_CONFIGURATION } from "./configuration";
-import { HTTPJsonBodyRoute } from "./http-jsonbody-route";
+import { HTTP_CONFIGURATION } from "./configuration.js";
+import { HTTPJsonBodyRoute } from "./http-jsonbody-route.js";
 import { MetaProtocol } from "@meta-system/meta-protocol-helper";
 import { FunctionManager } from "@meta-system/meta-function-helper";
-import Fastify, { FastifyInstance } from "fastify";
+import Fastify from "fastify";
 import fastifyHelmet from "@fastify/helmet";
 import fastifyCookie from "@fastify/cookie";
 import fastifyCors from "@fastify/cors";
@@ -13,7 +13,7 @@ export class HttpMetaProtocol extends MetaProtocol<HTTP_CONFIGURATION> {
     return {};
   }
 
-  private server : FastifyInstance;
+  private server : Fastify.FastifyInstance;
   public constructor (
     protocolConfiguration : HTTP_CONFIGURATION,
     functionManager : FunctionManager,
