@@ -10,7 +10,7 @@
     "corsConfig": { "type": "object", "subtype": {
       "origin": { "type": "string", "required": true },
       "optionsSuccessStatus": { "type": "number", "required": true },
-      "allowedHeaders": { "type": "string", "required": true }
+      "allowedHeaders": { "type": "string", "required": false }
     }},
     "cookieSecret": { "type": "string" },
     "routePrefix": { "type": "string" },

@@ -6,7 +6,7 @@ export type HTTP_CONFIGURATION = {
   corsConfig : {
     origin : string;
     optionsSuccessStatus : number;
-    allowedHeaders : string;
+    allowedHeaders ?: string;
   };
   cookieSecret ?: string;
   routes : HTTPRouteConfiguration[];
