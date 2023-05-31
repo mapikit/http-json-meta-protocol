@@ -1,8 +1,6 @@
 {
-  "protocolName": "http-json-meta-protocol",
-  "description": "A protocol for HTTP JSON processing in meta-system",
-  "entrypoint": "./dist/index.js",
-  "className": "HttpMetaProtocol",
+  "name": "http-json-meta-protocol",
+  "entrypoint": "./dist/entrypoint.js",
   "configurationFormat": {
     "port": { "type": "number", "required": true },
     "host": { "type": "string", "required": true },
@@ -61,5 +59,8 @@
         }}
       }}
     }}
-  }
+  },
+  "permissions": [
+    { "entity": "bopFunctions", "permissions": ["get_function"] }
+  ]
 }

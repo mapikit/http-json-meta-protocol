@@ -1,24 +1,21 @@
 import { HTTP_CONFIGURATION } from "./configuration.js";
 import { HTTPJsonBodyRoute } from "./http-jsonbody-route.js";
-import { MetaProtocol } from "@meta-system/meta-protocol-helper";
-import { FunctionManager } from "@meta-system/meta-function-helper";
 import Fastify from "fastify";
 import fastifyHelmet from "@fastify/helmet";
 import fastifyCookie from "@fastify/cookie";
 import fastifyCors from "@fastify/cors";
 import fastifyFormbody from "@fastify/formbody";
 
-export class HttpMetaProtocol extends MetaProtocol<HTTP_CONFIGURATION> {
+export class HttpMetaProtocol {
   public getProtocolPublicMethods () : Record<string, Function> {
     return {};
   }
 
   private server : Fastify.FastifyInstance;
   public constructor (
-    protocolConfiguration : HTTP_CONFIGURATION,
-    functionManager : FunctionManager,
+    private readonly protocolConfiguration : HTTP_CONFIGURATION,
+    private readonly systemFunctions : Map<string, Function>
   ) {
-    super(protocolConfiguration, functionManager);
   }
 
   // eslint-disable-next-line max-lines-per-function
@@ -49,7 +46,7 @@ export class HttpMetaProtocol extends MetaProtocol<HTTP_CONFIGURATION> {
       }`);
 
 
-      routesSequences.push(this.server.register(new HTTPJsonBodyRoute(routeConfig, this.bopsManager).getPlugin())
+      routesSequences.push(this.server.register(new HTTPJsonBodyRoute(routeConfig, this.systemFunctions).getPlugin())
         .then(() => {
           console.log(`[HTTP_JSONBODY_PROTOCOL] DONE Mapping route "${routeConfig.route}"`);
         }, (err) => {
