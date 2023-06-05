@@ -1,5 +1,4 @@
 import fastifyMiddie from "@fastify/middie";
-import { FunctionManager } from "@meta-system/meta-function-helper";
 import Fastify from "fastify";
 import { getObjectProperty } from "./utils/get-object-property.js";
 import { setValueAtObjectPath } from "./utils/set-value-at-object-path.js";
@@ -10,7 +9,7 @@ import { HTTPOutputMap } from "./output-map.js";
 export class HTTPJsonBodyRoute {
   public constructor (
     private routeConfigurations : HTTPRouteConfiguration,
-    private functionManager : FunctionManager,
+    private systemFunctions : Map<string, Function>,
   ) { }
 
   // eslint-disable-next-line max-lines-per-function
@@ -35,13 +34,12 @@ export class HTTPJsonBodyRoute {
   // eslint-disable-next-line max-lines-per-function
   private getMiddleware (middleware : Middleware)
     : Fastify.onRequestHookHandler {
-    const bop = this.functionManager.get(middleware.businessOperation);
+    const bop = this.systemFunctions.get(middleware.businessOperation);
     // eslint-disable-next-line max-lines-per-function
     const wrapped = (async (
       req : Fastify.FastifyRequest, res : Fastify.FastifyReply, done : Fastify.HookHandlerDoneFunction)
     : Promise<void> => {
       const functionInputs = HTTPInputMap.mapInputs(req, middleware.inputMapConfiguration);
-      console.log(functionInputs);
       const results = await bop(functionInputs);
 
       if (
@@ -66,7 +64,7 @@ export class HTTPJsonBodyRoute {
   }
 
   private wrapFunctionInProtocol () : (req : Fastify.FastifyRequest, res : Fastify.FastifyReply) => Promise<void> {
-    const bop = this.functionManager.get(this.routeConfigurations.businessOperation);
+    const bop = this.systemFunctions.get(this.routeConfigurations.businessOperation);
 
     return (async (req : Fastify.FastifyRequest, res : Fastify.FastifyReply) : Promise<void> => {
       const functionInputs = HTTPInputMap.mapInputs(req, this.routeConfigurations.inputMapConfiguration);

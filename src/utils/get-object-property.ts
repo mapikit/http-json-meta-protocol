@@ -4,6 +4,7 @@ export const getObjectProperty = <T>(object : object, path : string) : T | undef
   let currentObjectRef = object;
 
   for (const step of pathSteps) {
+    if (!currentObjectRef) { return undefined }
     result = currentObjectRef[step] ?? undefined;
 
     if (result === undefined) return undefined;
