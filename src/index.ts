@@ -7,10 +7,6 @@ import fastifyCors from "@fastify/cors";
 import fastifyFormbody from "@fastify/formbody";
 
 export class HttpMetaProtocol {
-  public getProtocolPublicMethods () : Record<string, Function> {
-    return {};
-  }
-
   private server : Fastify.FastifyInstance;
   public constructor (
     private readonly protocolConfiguration : HTTP_CONFIGURATION,
