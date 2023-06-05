@@ -55,7 +55,6 @@ export class HttpMetaProtocol {
     // eslint-disable-next-line max-lines-per-function
     return new Promise((resolve, reject) => {
       this.server.listen({ port: this.protocolConfiguration.port, host: this.protocolConfiguration.host })
-        .then((a) => { console.log(a); })
         .catch((err) => {
           reject(`[HTTP_JSONBODY_PROTOCOL] Error while setting up port ${this.protocolConfiguration.port} :: ${err}`);
           console.log(

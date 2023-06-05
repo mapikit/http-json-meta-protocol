@@ -40,7 +40,6 @@ export class HTTPJsonBodyRoute {
       req : Fastify.FastifyRequest, res : Fastify.FastifyReply, done : Fastify.HookHandlerDoneFunction)
     : Promise<void> => {
       const functionInputs = HTTPInputMap.mapInputs(req, middleware.inputMapConfiguration);
-      console.log(functionInputs);
       const results = await bop(functionInputs);
 
       if (
