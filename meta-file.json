@@ -44,7 +44,7 @@
           "originPath": { "type": "string", "required": true },
           "targetPath": { "type": "string", "required": true }
         }},
-        "interceptMapConfiguration": { "required": false, "type": "string", "subtype": {
+        "interceptMapConfiguration": { "required": false, "type": "object", "subtype": {
           "shouldInterceptPath": { "type": "string", "required": true },
           "statusCode": { "type": "string", "required": true },
           "headers": { "type": "array", "required": true, "subtype": "cloudedObject" },
