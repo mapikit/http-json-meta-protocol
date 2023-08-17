@@ -22,7 +22,7 @@
         "targetPath": { "type": "string", "required": true }
       }},
       "resultMapConfiguration": { "type": "object", "required": true, "subtype": {
-        "statusCode": { "type": "string", "required": true },
+        "statusCode": [{ "type": "string", "required": true }, { "type": "number", "required": true }],
         "headers": { "type": "array", "required": true, "subtype": "cloudedObject" },
         "body": { "type": "cloudedObject", "required": true },
         "cookies": { "type": "array", "subtype": {
