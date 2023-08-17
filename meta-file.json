@@ -46,7 +46,7 @@
         }},
         "interceptMapConfiguration": { "required": false, "type": "object", "subtype": {
           "shouldInterceptPath": { "type": "string", "required": true },
-          "statusCode": { "type": "string", "required": true },
+          "statusCode": [{ "type": "string", "required": true }, { "type": "number", "required": true }],
           "headers": { "type": "array", "required": true, "subtype": "cloudedObject" },
           "body": { "type": "cloudedObject", "required": true },
           "cookies": { "type": "array", "subtype": {
