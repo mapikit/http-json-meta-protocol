@@ -68,8 +68,17 @@ export class HTTPJsonBodyRoute {
 
     return (async (req : Fastify.FastifyRequest, res : Fastify.FastifyReply) : Promise<void> => {
       const functionInputs = HTTPInputMap.mapInputs(req, this.routeConfigurations.inputMapConfiguration);
-      const result = await bop(functionInputs);
 
+      let sentError = false
+      const returnErrorResult = () => {
+        res.status(500)
+        res.send({ error: "Internal Server Error" })
+        sentError = true;
+      }
+  
+      const result = await bop(functionInputs).catch(() => returnErrorResult());
+
+      if (sentError) return;
       await HTTPOutputMap.resolveOutput(result, res, this.routeConfigurations.resultMapConfiguration);
     });
   }
