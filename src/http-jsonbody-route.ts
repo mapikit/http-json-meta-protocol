@@ -40,7 +40,17 @@ export class HTTPJsonBodyRoute {
       req : Fastify.FastifyRequest, res : Fastify.FastifyReply, done : Fastify.HookHandlerDoneFunction)
     : Promise<void> => {
       const functionInputs = HTTPInputMap.mapInputs(req, middleware.inputMapConfiguration);
-      const results = await bop(functionInputs);
+
+      let sentError = false;
+      const returnErrorResult = () => {
+        res.status(500)
+        res.send({ error: "Internal Server Error" })
+        sentError = true;
+      }
+      const results = await bop(functionInputs)
+        .catch(() => returnErrorResult());
+
+      if (sentError) return;
 
       if (
         middleware?.interceptMapConfiguration?.shouldInterceptPath) {
@@ -76,7 +86,8 @@ export class HTTPJsonBodyRoute {
         sentError = true;
       }
   
-      const result = await bop(functionInputs).catch(() => returnErrorResult());
+      const result = await bop(functionInputs)
+        .catch(() => { returnErrorResult()});
 
       if (sentError) return;
       await HTTPOutputMap.resolveOutput(result, res, this.routeConfigurations.resultMapConfiguration);
